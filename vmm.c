@@ -15,6 +15,48 @@ BOOL blockStatus[BLOCK_SUM];
 /* 访存请求 */
 Ptr_MemoryAccessRequest ptr_memAccReq;
 
+/* prin actMem */
+void do_print_actMem()
+{
+	int i,j,k;
+	printf("页号\t内容\t\n");
+	for(i=0,k=0;i<BLOCK_SUM;i++){
+		printf("%d\t",i);
+		for(j=0;j<PAGE_SIZE;j++){
+			printf("%c",actMem[k++]);
+		}
+		printf("\n");
+	}
+}
+
+
+/*print auxmem*/
+void do_print_auxMem()
+{
+	int i,j,k,readNum;
+	BYTE temp[VIRTUAL_MEMORY_SIZE];
+	if (fseek(ptr_auxMem, 0, SEEK_SET) < 0)//read from the begining
+	{
+		do_error(ERROR_FILE_SEEK_FAILED);
+		exit(1);
+	}
+	if ((readNum = fread(temp, 
+		sizeof(BYTE), VIRTUAL_MEMORY_SIZE, ptr_auxMem)) < VIRTUAL_MEMORY_SIZE)
+	{
+		do_error(ERROR_FILE_READ_FAILED);
+		exit(1);
+	}
+	printf("页号\t内容\t\n");
+	for(i=0,k=0;i<PAGE_SUM;i++)
+	{
+		printf("%d\t",i);
+		for(j=0;j<PAGE_SIZE;j++){
+			printf("%c",temp[k++]);
+		}
+		printf("\n");
+	}
+}
+
 /*初始化辅存文件*/
 void initFile(){
 	int i;
@@ -449,9 +491,17 @@ int main(int argc, char* argv[])
 	{
 		do_request();
 		do_response();
-		printf("按Y打印页表，按其他键不打印...\n");
-		if ((c = getchar()) == 'y' || c == 'Y')
+		printf("按Y打印页表，按A键打印辅存，按B键打印实存,按其他键不打印...\n");
+		c=getchar();
+		if (c  == 'y' || c == 'Y')
 			do_print_info();
+		else if (c == 'A' || c == 'a')
+		{
+			printf("you print A/a!");			
+			do_print_auxMem();
+		}
+		else if (c == 'B' || c == 'b')
+			do_print_actMem();
 		while (c != '\n')
 			c = getchar();
 		printf("按X退出程序，按其他键继续...\n");

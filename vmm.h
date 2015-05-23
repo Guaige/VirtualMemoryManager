@@ -109,5 +109,10 @@ void do_print_info();
 /* 获取页面保护类型字符串 */
 char *get_proType_str(char *, BYTE);
 
+/*prin actMem*/
+void do_print_actMem();
+
+/*print aux mem*/
+void do_print_auxMem();
 
 #endif

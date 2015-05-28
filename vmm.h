@@ -6,6 +6,7 @@
 #endif
 /*#undef DEBUG*/
 
+#define Require_ljl
 
 /* 模拟辅存的文件路径 */
 #define AUXILIARY_MEMORY "test.txt"

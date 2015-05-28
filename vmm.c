@@ -406,7 +406,52 @@ void do_error(ERROR_CODE code)
 	}
 }
 
-/* 产生访存请求 */
+#ifdef Require_ljl
+/* 手动产生访存请求 */
+void do_own_request()
+{
+	unsigned int virtual_memory_size = 0;
+	unsigned int reqtype = 0;
+	unsigned int writeValue = 0;
+
+	/* 输入请求地址 */
+	printf("请输入请求地址(0-255)：");
+	scanf("%d",&virtual_memory_size);
+	ptr_memAccReq->virAddr = virtual_memory_size;
+	/* 输入请求类型 */
+	printf("请输入请求类型(0-读请求,1-写请求,2-执行请求)：");
+	scanf("%d",&reqtype);
+	switch (reqtype)
+	{
+		case 0: //读请求
+		{
+			ptr_memAccReq->reqType = REQUEST_READ;
+			printf("产生请求：\n地址：%u\t类型：读取\n", ptr_memAccReq->virAddr);
+			break;
+		}
+		case 1: //写请求
+		{
+			ptr_memAccReq->reqType = REQUEST_WRITE;
+			/* 输入待写入的值 */
+			printf("请输入待写入的值:");
+			scanf("%d",&writeValue);
+			ptr_memAccReq->value = writeValue % 0xFFu;
+			printf("产生请求：\n地址：%u\t类型：写入\t值：%02X\n", ptr_memAccReq->virAddr, ptr_memAccReq->value);
+			break;
+		}
+		case 2:
+		{
+			ptr_memAccReq->reqType = REQUEST_EXECUTE;
+			printf("产生请求：\n地址：%u\t类型：执行\n", ptr_memAccReq->virAddr);
+			break;
+		}
+		default:
+			printf("请求类型错误，请按照提示输入0-2");
+			break;
+	}	
+}
+#endif
+/* 随机产生访存请求 */
 void do_request()
 {
 	/* 随机产生请求地址 */
@@ -474,7 +519,7 @@ char *get_proType_str(char *str, BYTE type)
 
 int main(int argc, char* argv[])
 {
-	char c;
+	char c = '\n';
 	int i;
 	initFile();
 	if (!(ptr_auxMem = fopen(AUXILIARY_MEMORY, "r+")))
@@ -489,10 +534,11 @@ int main(int argc, char* argv[])
 	/* 在循环中模拟访存请求与处理过程 */
 	while (TRUE)
 	{
-		do_request();
+		do_own_request();
 		do_response();
 		printf("按Y打印页表，按A键打印辅存，按B键打印实存,按其他键不打印...\n");
-		c=getchar();
+		while(c == '\n')
+			c = getchar();
 		if (c  == 'y' || c == 'Y')
 			do_print_info();
 		else if (c == 'A' || c == 'a')
